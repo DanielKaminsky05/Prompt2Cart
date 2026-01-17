@@ -1,0 +1,125 @@
+================================================================================
+                         POTENTIAL FEATURE IDEAS
+================================================================================
+
+CORE ENHANCEMENTS
+-----------------
+1. Price comparison mode - Show same/similar products across different stores 
+   with price differences
+2. Wishlist/Save for later - Let users save items without adding to cart
+3. Deal alerts - "This item is 20% off today!"
+4. Bundle suggestions - "People who bought running shoes also bought these socks"
+
+PERSONALIZATION
+---------------
+5. Shopping persona quiz - Quick onboarding to learn user preferences
+6. Purchase history context - "Based on shirts you bought before, here are 
+   matching pants"
+7. Budget guardian - "You mentioned $100 budget, here's what fits"
+
+CONVERSATIONAL FEATURES
+-----------------------
+8. Comparison mode - "Compare these two jackets for me"
+9. Refinement prompts - "Show me cheaper options" / "What about in blue?"
+10. Gift mode - "Help me find a birthday gift for my mom"
+11. Occasion shopping - "I need an outfit for a wedding"
+
+TRUST & TRANSPARENCY
+--------------------
+12. Sustainability score - Show eco-ratings for products
+13. Store ratings - Display merchant trustworthiness
+14. Return policy preview - Quick view of return terms before purchase
+
+FUN/VIRAL FEATURES
+------------------
+15. Share cart - Share your curated cart with friends
+16. "Surprise me" - Random product discovery based on preferences
+17. Daily deal spotlight - Featured product with limited-time offer
+
+VOICE (ELEVENLABS INTEGRATION)
+------------------------------
+18. Voice shopping - Speak your query instead of typing
+19. Voice product descriptions - Hear product details read aloud
+20. Voice checkout confirmation - Audio confirmation of order
+
+================================================================================
+                         POTENTIAL PROJECT NAMES
+================================================================================
+
+CONVERSATIONAL / CHAT VIBES
+---------------------------
+- CartChat
+- ShopWhisper
+- ChatCart
+- TalkShop
+- SayBuy
+- VoiceVendor
+- SpeakShop
+
+SIMPLE & CATCHY
+---------------
+- Cartr
+- Buyit
+- Shoply
+- Fetchr
+- Snagged
+- Nabbit
+- Grabsy
+
+AI/AGENT FOCUSED
+----------------
+- ShopAgent
+- BuyBot
+- CartAI
+- ShopMind
+- AIsle (AI + Aisle)
+- Agentcart
+- Smartcart
+
+PLAYFUL / MEMORABLE
+-------------------
+- Yoink! 
+- Swoop
+- Snatch
+- Blink Buy
+- SnapCart
+- Insta-Cart (taken lol)
+- ZapShop
+
+SLOGAN-INSPIRED
+---------------
+- SpeakCart (from "Speak it. Cart it. Own it.")
+- CartOwn
+- OwnIt
+- SpeakOwn
+
+ABSTRACT / BRANDABLE
+--------------------
+- Vendo
+- Mercato
+- Trovato (Italian for "found")
+- Kopio
+- Pronto
+- Veloz
+
+PROTOCOL/TECH VIBES
+-------------------
+- UniShop (Universal Commerce)
+- Omnicart
+- Protocart
+- FluxCart
+- StreamBuy
+
+================================================================================
+                           TOP PICKS (MY FAVORITES)
+================================================================================
+
+1. CartChat     - Simple, describes the product perfectly
+2. AIsle        - Clever wordplay (AI + shopping aisle)
+3. Yoink!       - Fun, memorable, implies quick grabbing
+4. SpeakCart    - Ties to your slogan
+5. Nabbit       - Playful, easy to say, implies getting what you want fast
+6. Trovato      - Elegant, means "found" in Italian
+7. ShopWhisper  - Implies personal, AI-powered recommendations
+
+================================================================================

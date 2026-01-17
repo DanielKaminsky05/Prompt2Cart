@@ -102,6 +102,7 @@ STRETCH GOALS / LOWER PRIORITY FEATURES
 [ ] AI-powered visualization (show user wearing clothes via Gemini API)
 [ ] Filters: price tags, color, etc.
 [ ] Smart ranking: show products that best match query/prompt
+[] Elevan labs api
 
 ================================================================================
 NOTES
