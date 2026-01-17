@@ -1,27 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ChatInput } from "@/components/ChatInput";
 import { ProductGrid } from "@/components/ProductGrid";
 import { Cart } from "@/components/Cart";
 import { Checkout, OrderSuccess } from "@/components/Checkout";
+import { FloatingChat } from "@/components/FloatingChat";
+import { Recommendations } from "@/components/Recommendations";
+import { SortingControls, SortOption } from "@/components/SortingControls";
 import { Button } from "@/components/ui/button";
 import { Product, mockProducts } from "@/lib/mockData";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Sparkles } from "lucide-react";
+import { ShoppingCart, Home, User, Settings, HelpCircle } from "lucide-react";
+import Image from "next/image";
 
-export default function Home() {
+export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [recommendations, setRecommendations] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [currentQuery, setCurrentQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
 
+  const handleGoHome = () => {
+    setProducts([]);
+    setRecommendations([]);
+    setHasSearched(false);
+    setCurrentQuery("");
+    setSortBy("relevance");
+  };
+
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     setHasSearched(true);
+    setCurrentQuery(query);
 
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1200));
@@ -30,8 +46,31 @@ export default function Home() {
     const shuffled = [...mockProducts].sort(() => 0.5 - Math.random());
     const count = Math.floor(Math.random() * 3) + 4;
     setProducts(shuffled.slice(0, count));
+
+    // Mock recommendations (remaining products)
+    setRecommendations(shuffled.slice(count, count + 4));
     setIsLoading(false);
   };
+
+  // Sort products based on current sort option
+  const sortedProducts = useMemo(() => {
+    const sorted = [...products];
+    switch (sortBy) {
+      case "price-low":
+        return sorted.sort((a, b) => a.price - b.price);
+      case "price-high":
+        return sorted.sort((a, b) => b.price - a.price);
+      case "delivery":
+        return sorted.sort((a, b) => {
+          const getMinDays = (time: string) => parseInt(time.split("-")[0]) || 0;
+          return getMinDays(a.deliveryTime) - getMinDays(b.deliveryTime);
+        });
+      case "rating":
+      case "relevance":
+      default:
+        return sorted;
+    }
+  }, [products, sortBy]);
 
   const handleToggleProduct = (product: Product) => {
     setSelectedProducts((prev) => {
@@ -41,6 +80,12 @@ export default function Home() {
       }
       return [...prev, product];
     });
+  };
+
+  const handleAddRecommendation = (product: Product) => {
+    if (!selectedProducts.some((p) => p.id === product.id)) {
+      setSelectedProducts((prev) => [...prev, product]);
+    }
   };
 
   const handleRemoveFromCart = (productId: string) => {
@@ -57,7 +102,15 @@ export default function Home() {
     setIsSuccessOpen(true);
     setSelectedProducts([]);
     setProducts([]);
+    setRecommendations([]);
     setHasSearched(false);
+    setCurrentQuery("");
+  };
+
+  const handleChatMessage = (message: string) => {
+    // This will be connected to the Gemini API
+    console.log("Chat message:", message);
+    handleSearch(message);
   };
 
   return (
@@ -65,17 +118,68 @@ export default function Home() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Logo */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2"
-          >
-            <div className="p-2 rounded-lg bg-primary/20">
-              <Sparkles className="h-5 w-5 text-primary" />
-            </div>
-            <span className="text-xl font-bold text-white">Trovato</span>
-          </motion.div>
+          {/* Logo + Navigation grouped together */}
+          <div className="flex items-center gap-6">
+            {/* Logo - Clickable to go home */}
+            <motion.button
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              onClick={handleGoHome}
+              className="flex items-center gap-2 hover:opacity-80 transition-all duration-200 hover:scale-105"
+            >
+              <Image
+                src="/logo1.png"
+                alt="Trovato"
+                width={40}
+                height={40}
+                className="rounded-lg"
+              />
+              <span className="text-xl font-bold text-white">Trovato</span>
+            </motion.button>
+
+            {/* Navigation - next to logo */}
+            <motion.nav
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="hidden md:flex items-center gap-1"
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleGoHome}
+                className="text-muted-foreground hover:text-white hover:bg-white/5 gap-2 transition-all duration-200"
+              >
+                <Home className="h-4 w-4" />
+                Home
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-white hover:bg-white/5 gap-2 transition-all duration-200"
+              >
+                <HelpCircle className="h-4 w-4" />
+                How it Works
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-white hover:bg-white/5 gap-2 transition-all duration-200"
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </Button>
+              <a href="/login">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-white hover:bg-white/5 gap-2 transition-all duration-200"
+                >
+                  <User className="h-4 w-4" />
+                  Login
+                </Button>
+              </a>
+            </motion.nav>
+          </div>
 
           {/* Cart Button */}
           <motion.div
@@ -85,7 +189,7 @@ export default function Home() {
             <Button
               variant="outline"
               size="sm"
-              className="relative glass border-white/10 hover:bg-white/5"
+              className="relative glass border-white/10 hover:bg-white/5 transition-all duration-200"
               onClick={() => setIsCartOpen(true)}
             >
               <ShoppingCart className="h-5 w-5" />
@@ -140,14 +244,23 @@ export default function Home() {
           )}
         </AnimatePresence>
 
-        {/* Compact search after first search */}
-        {hasSearched && (
+        {/* Results Header with Sorting */}
+        {hasSearched && !isLoading && products.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="mb-6 space-y-4"
           >
-            <ChatInput onSearch={handleSearch} isLoading={isLoading} />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-6 bg-primary rounded-full" />
+                <h2 className="text-xl font-semibold text-white">Results</h2>
+                <span className="text-sm text-muted-foreground glass px-3 py-1 rounded-full">
+                  {products.length} products
+                </span>
+              </div>
+              <SortingControls currentSort={sortBy} onSortChange={setSortBy} />
+            </div>
           </motion.div>
         )}
 
@@ -163,7 +276,13 @@ export default function Home() {
               <div className="relative">
                 <div className="h-16 w-16 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Sparkles className="h-6 w-6 text-primary animate-pulse" />
+                  <Image
+                    src="/logo.png"
+                    alt="Loading"
+                    width={32}
+                    height={32}
+                    className="animate-pulse rounded-md"
+                  />
                 </div>
               </div>
               <p className="text-muted-foreground text-lg">
@@ -174,12 +293,21 @@ export default function Home() {
         </AnimatePresence>
 
         {/* Products Grid */}
-        {!isLoading && products.length > 0 && (
-          <ProductGrid
-            products={products}
-            selectedProducts={selectedProducts}
-            onToggleProduct={handleToggleProduct}
-          />
+        {!isLoading && sortedProducts.length > 0 && (
+          <>
+            <ProductGrid
+              products={sortedProducts}
+              selectedProducts={selectedProducts}
+              onToggleProduct={handleToggleProduct}
+            />
+
+            {/* Recommendations Section */}
+            <Recommendations
+              products={recommendations}
+              selectedProducts={selectedProducts}
+              onToggleProduct={handleToggleProduct}
+            />
+          </>
         )}
 
         {/* Empty state after search */}
@@ -219,6 +347,15 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Floating Chat - only show after first search */}
+      {hasSearched && !isLoading && (
+        <FloatingChat
+          onSendMessage={handleChatMessage}
+          isLoading={isLoading}
+          initialQuery={currentQuery}
+        />
+      )}
 
       {/* Cart Sidebar */}
       <Cart

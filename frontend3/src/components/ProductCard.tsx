@@ -39,14 +39,12 @@ export function ProductCard({ product, isSelected, onToggle }: ProductCardProps)
 
                 {/* Checkbox */}
                 <div className="absolute top-3 right-3 z-10">
-                    <div className="glass rounded-lg p-1">
-                        <Checkbox
-                            checked={isSelected}
-                            onCheckedChange={() => onToggle(product)}
-                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                            className="h-5 w-5 border-white/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                        />
-                    </div>
+                    <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => onToggle(product)}
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                        className="h-6 w-6 bg-white/90 border border-white/20 rounded-md data-[state=checked]:bg-primary data-[state=checked]:border-primary shadow-lg"
+                    />
                 </div>
 
                 {/* Price badge */}
