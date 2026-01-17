@@ -1,0 +1,557 @@
+"use client";
+
+import { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+    Camera,
+    Upload,
+    User,
+    ArrowRight,
+    ArrowLeft,
+    Sparkles,
+    MapPin,
+    Shirt,
+    Leaf,
+    DollarSign,
+    X
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
+type Step = "welcome" | "photo" | "sizes" | "style" | "values" | "budget" | "complete";
+
+interface UserProfile {
+    name: string;
+    email: string;
+    photo: string | null;
+    sizes: {
+        clothing: string;
+        waist: string;
+        shoe: string;
+        fit: string;
+    };
+    style: string[];
+    values: string[];
+    budget: string;
+    zipCode: string;
+}
+
+const styleOptions = [
+    { id: "streetwear", label: "Streetwear", emoji: "🔥" },
+    { id: "minimalist", label: "Minimalist", emoji: "⚪" },
+    { id: "old-money", label: "Old Money", emoji: "💎" },
+    { id: "gorpcore", label: "Gorpcore", emoji: "🏔️" },
+    { id: "casual", label: "Casual", emoji: "👕" },
+    { id: "formal", label: "Formal", emoji: "👔" },
+];
+
+const valueOptions = [
+    { id: "eco-friendly", label: "Eco-Friendly" },
+    { id: "vegan", label: "Vegan / Cruelty-Free" },
+    { id: "local", label: "Made Locally" },
+    { id: "minority-owned", label: "Minority-Owned" },
+    { id: "carbon-neutral", label: "Carbon Neutral" },
+];
+
+const budgetOptions = [
+    { id: "budget", label: "Budget-Friendly", description: "Best value for money", emoji: "💵" },
+    { id: "mid", label: "Mid-Range", description: "Quality meets price", emoji: "💳" },
+    { id: "luxury", label: "Luxury", description: "Premium products", emoji: "💎" },
+];
+
+export default function LoginPage() {
+    const [step, setStep] = useState<Step>("welcome");
+    const [profile, setProfile] = useState<UserProfile>({
+        name: "",
+        email: "",
+        photo: null,
+        sizes: { clothing: "", waist: "", shoe: "", fit: "" },
+        style: [],
+        values: [],
+        budget: "",
+        zipCode: "",
+    });
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setProfile((prev) => ({ ...prev, photo: reader.result as string }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleStyleToggle = (styleId: string) => {
+        setProfile((prev) => ({
+            ...prev,
+            style: prev.style.includes(styleId)
+                ? prev.style.filter((s) => s !== styleId)
+                : [...prev.style, styleId],
+        }));
+    };
+
+    const handleValueToggle = (valueId: string) => {
+        setProfile((prev) => ({
+            ...prev,
+            values: prev.values.includes(valueId)
+                ? prev.values.filter((v) => v !== valueId)
+                : [...prev.values, valueId],
+        }));
+    };
+
+    const nextStep = () => {
+        const steps: Step[] = ["welcome", "photo", "sizes", "style", "values", "budget", "complete"];
+        const currentIndex = steps.indexOf(step);
+        if (currentIndex < steps.length - 1) {
+            setStep(steps[currentIndex + 1]);
+        }
+    };
+
+    const prevStep = () => {
+        const steps: Step[] = ["welcome", "photo", "sizes", "style", "values", "budget", "complete"];
+        const currentIndex = steps.indexOf(step);
+        if (currentIndex > 0) {
+            setStep(steps[currentIndex - 1]);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gradient-glow flex items-center justify-center p-6">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full max-w-md glass-card rounded-2xl p-8 space-y-6"
+            >
+                {/* Header */}
+                <div className="text-center space-y-2">
+                    <Link href="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        <Image src="/logo1.png" alt="Trovato" width={48} height={48} className="rounded-lg" />
+                        <span className="text-2xl font-bold text-white">Trovato</span>
+                    </Link>
+                </div>
+
+                <AnimatePresence mode="wait">
+                    {/* Welcome Step */}
+                    {step === "welcome" && (
+                        <motion.div
+                            key="welcome"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-6"
+                        >
+                            <div className="text-center space-y-2">
+                                <h2 className="text-xl font-semibold text-white">Create Your Profile</h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Help us find products tailored just for you
+                                </p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-sm text-muted-foreground mb-2 block">Name</label>
+                                    <Input
+                                        placeholder="Your name"
+                                        value={profile.name}
+                                        onChange={(e) => setProfile((prev) => ({ ...prev, name: e.target.value }))}
+                                        className="glass-input h-12"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-muted-foreground mb-2 block">Email</label>
+                                    <Input
+                                        type="email"
+                                        placeholder="your@email.com"
+                                        value={profile.email}
+                                        onChange={(e) => setProfile((prev) => ({ ...prev, email: e.target.value }))}
+                                        className="glass-input h-12"
+                                    />
+                                </div>
+                            </div>
+
+                            <Button
+                                onClick={nextStep}
+                                disabled={!profile.name || !profile.email}
+                                className="w-full h-12 bg-primary hover:bg-primary/90 gap-2"
+                            >
+                                Continue <ArrowRight className="h-4 w-4" />
+                            </Button>
+                        </motion.div>
+                    )}
+
+                    {/* Photo Step */}
+                    {step === "photo" && (
+                        <motion.div
+                            key="photo"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-6"
+                        >
+                            <div className="text-center space-y-2">
+                                <Camera className="h-8 w-8 text-primary mx-auto" />
+                                <h2 className="text-xl font-semibold text-white">Upload Your Look</h2>
+                                <p className="text-sm text-muted-foreground">
+                                    We'll use AI to understand your style
+                                </p>
+                            </div>
+
+                            <div className="flex flex-col items-center gap-4">
+                                {profile.photo ? (
+                                    <div className="relative">
+                                        <Image
+                                            src={profile.photo}
+                                            alt="Your photo"
+                                            width={150}
+                                            height={150}
+                                            className="rounded-full object-cover h-36 w-36"
+                                        />
+                                        <Button
+                                            size="icon"
+                                            variant="destructive"
+                                            className="absolute -top-2 -right-2 h-8 w-8 rounded-full"
+                                            onClick={() => setProfile((prev) => ({ ...prev, photo: null }))}
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="h-36 w-36 rounded-full border-2 border-dashed border-white/20 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
+                                    >
+                                        <User className="h-12 w-12 text-muted-foreground" />
+                                        <span className="text-xs text-muted-foreground mt-2">Click to upload</span>
+                                    </div>
+                                )}
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    capture="user"
+                                    onChange={handlePhotoUpload}
+                                    className="hidden"
+                                />
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="glass border-white/10 gap-2"
+                                    >
+                                        <Upload className="h-4 w-4" /> From Library
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            if (fileInputRef.current) {
+                                                fileInputRef.current.setAttribute("capture", "user");
+                                                fileInputRef.current.click();
+                                            }
+                                        }}
+                                        className="glass border-white/10 gap-2"
+                                    >
+                                        <Camera className="h-4 w-4" /> Take Photo
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <Button variant="outline" onClick={prevStep} className="flex-1 glass border-white/10">
+                                    <ArrowLeft className="h-4 w-4 mr-2" /> Back
+                                </Button>
+                                <Button onClick={nextStep} className="flex-1 bg-primary hover:bg-primary/90">
+                                    {profile.photo ? "Continue" : "Skip"} <ArrowRight className="h-4 w-4 ml-2" />
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* Sizes Step */}
+                    {step === "sizes" && (
+                        <motion.div
+                            key="sizes"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-6"
+                        >
+                            <div className="text-center space-y-2">
+                                <Shirt className="h-8 w-8 text-primary mx-auto" />
+                                <h2 className="text-xl font-semibold text-white">Your Fit Profile</h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Help us find the perfect fit
+                                </p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-xs text-muted-foreground mb-1 block">Clothing Size</label>
+                                        <select
+                                            value={profile.sizes.clothing}
+                                            onChange={(e) => setProfile((prev) => ({
+                                                ...prev,
+                                                sizes: { ...prev.sizes, clothing: e.target.value }
+                                            }))}
+                                            className="w-full h-10 px-3 rounded-lg glass-input text-white text-sm"
+                                        >
+                                            <option value="">Select</option>
+                                            <option value="XS">XS</option>
+                                            <option value="S">S</option>
+                                            <option value="M">M</option>
+                                            <option value="L">L</option>
+                                            <option value="XL">XL</option>
+                                            <option value="XXL">XXL</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-muted-foreground mb-1 block">Shoe Size</label>
+                                        <Input
+                                            placeholder="e.g., 10.5"
+                                            value={profile.sizes.shoe}
+                                            onChange={(e) => setProfile((prev) => ({
+                                                ...prev,
+                                                sizes: { ...prev.sizes, shoe: e.target.value }
+                                            }))}
+                                            className="glass-input h-10"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="text-xs text-muted-foreground mb-2 block">Fit Preference</label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {["Slim", "Regular", "Oversized"].map((fit) => (
+                                            <Button
+                                                key={fit}
+                                                variant={profile.sizes.fit === fit ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setProfile((prev) => ({
+                                                    ...prev,
+                                                    sizes: { ...prev.sizes, fit }
+                                                }))}
+                                                className={profile.sizes.fit === fit ? "bg-primary" : "glass border-white/10"}
+                                            >
+                                                {fit}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <Button variant="outline" onClick={prevStep} className="flex-1 glass border-white/10">
+                                    <ArrowLeft className="h-4 w-4 mr-2" /> Back
+                                </Button>
+                                <Button onClick={nextStep} className="flex-1 bg-primary hover:bg-primary/90">
+                                    Continue <ArrowRight className="h-4 w-4 ml-2" />
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* Style Step */}
+                    {step === "style" && (
+                        <motion.div
+                            key="style"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-6"
+                        >
+                            <div className="text-center space-y-2">
+                                <Sparkles className="h-8 w-8 text-primary mx-auto" />
+                                <h2 className="text-xl font-semibold text-white">Your Vibe</h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Select the styles that match you
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                {styleOptions.map((style) => (
+                                    <Button
+                                        key={style.id}
+                                        variant={profile.style.includes(style.id) ? "default" : "outline"}
+                                        onClick={() => handleStyleToggle(style.id)}
+                                        className={`h-16 flex-col gap-1 ${profile.style.includes(style.id) ? "bg-primary glow-primary" : "glass border-white/10"
+                                            }`}
+                                    >
+                                        <span className="text-xl">{style.emoji}</span>
+                                        <span className="text-xs">{style.label}</span>
+                                    </Button>
+                                ))}
+                            </div>
+
+                            <div className="flex gap-3">
+                                <Button variant="outline" onClick={prevStep} className="flex-1 glass border-white/10">
+                                    <ArrowLeft className="h-4 w-4 mr-2" /> Back
+                                </Button>
+                                <Button onClick={nextStep} className="flex-1 bg-primary hover:bg-primary/90">
+                                    Continue <ArrowRight className="h-4 w-4 ml-2" />
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* Values Step */}
+                    {step === "values" && (
+                        <motion.div
+                            key="values"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-6"
+                        >
+                            <div className="text-center space-y-2">
+                                <Leaf className="h-8 w-8 text-primary mx-auto" />
+                                <h2 className="text-xl font-semibold text-white">Your Values</h2>
+                                <p className="text-sm text-muted-foreground">
+                                    What matters to you when shopping?
+                                </p>
+                            </div>
+
+                            <div className="space-y-3">
+                                {valueOptions.map((value) => (
+                                    <div
+                                        key={value.id}
+                                        onClick={() => handleValueToggle(value.id)}
+                                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${profile.values.includes(value.id)
+                                                ? "glass ring-2 ring-primary"
+                                                : "glass border-white/10 hover:bg-white/5"
+                                            }`}
+                                    >
+                                        <Checkbox checked={profile.values.includes(value.id)} />
+                                        <span className="text-sm text-white">{value.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex gap-3">
+                                <Button variant="outline" onClick={prevStep} className="flex-1 glass border-white/10">
+                                    <ArrowLeft className="h-4 w-4 mr-2" /> Back
+                                </Button>
+                                <Button onClick={nextStep} className="flex-1 bg-primary hover:bg-primary/90">
+                                    Continue <ArrowRight className="h-4 w-4 ml-2" />
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* Budget Step */}
+                    {step === "budget" && (
+                        <motion.div
+                            key="budget"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-6"
+                        >
+                            <div className="text-center space-y-2">
+                                <DollarSign className="h-8 w-8 text-primary mx-auto" />
+                                <h2 className="text-xl font-semibold text-white">Budget & Location</h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Almost done! Tell us your preferences
+                                </p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="space-y-3">
+                                    {budgetOptions.map((option) => (
+                                        <div
+                                            key={option.id}
+                                            onClick={() => setProfile((prev) => ({ ...prev, budget: option.id }))}
+                                            className={`flex items-center gap-3 p-4 rounded-lg cursor-pointer transition-all ${profile.budget === option.id
+                                                    ? "glass ring-2 ring-primary glow-primary"
+                                                    : "glass border-white/10 hover:bg-white/5"
+                                                }`}
+                                        >
+                                            <span className="text-2xl">{option.emoji}</span>
+                                            <div>
+                                                <div className="font-medium text-white">{option.label}</div>
+                                                <div className="text-xs text-muted-foreground">{option.description}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div>
+                                    <label className="text-xs text-muted-foreground mb-2 block flex items-center gap-1">
+                                        <MapPin className="h-3 w-3" /> Zip Code (for shipping estimates)
+                                    </label>
+                                    <Input
+                                        placeholder="Enter your zip code"
+                                        value={profile.zipCode}
+                                        onChange={(e) => setProfile((prev) => ({ ...prev, zipCode: e.target.value }))}
+                                        className="glass-input h-12"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <Button variant="outline" onClick={prevStep} className="flex-1 glass border-white/10">
+                                    <ArrowLeft className="h-4 w-4 mr-2" /> Back
+                                </Button>
+                                <Button onClick={nextStep} className="flex-1 bg-primary hover:bg-primary/90">
+                                    Complete <ArrowRight className="h-4 w-4 ml-2" />
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* Complete Step */}
+                    {step === "complete" && (
+                        <motion.div
+                            key="complete"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="space-y-6 text-center"
+                        >
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring", delay: 0.2 }}
+                                className="h-20 w-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto glow-primary"
+                            >
+                                <Sparkles className="h-10 w-10 text-primary" />
+                            </motion.div>
+
+                            <div>
+                                <h2 className="text-2xl font-bold text-white">You're All Set!</h2>
+                                <p className="text-muted-foreground mt-2">
+                                    Welcome to Trovato, {profile.name}!
+                                </p>
+                            </div>
+
+                            <Link href="/">
+                                <Button className="w-full h-12 bg-primary hover:bg-primary/90 gap-2">
+                                    Start Shopping <ArrowRight className="h-4 w-4" />
+                                </Button>
+                            </Link>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Progress dots */}
+                {step !== "complete" && (
+                    <div className="flex justify-center gap-2 pt-4">
+                        {["welcome", "photo", "sizes", "style", "values", "budget"].map((s) => (
+                            <div
+                                key={s}
+                                className={`h-2 w-2 rounded-full transition-all ${s === step ? "bg-primary w-6" : "bg-white/20"
+                                    }`}
+                            />
+                        ))}
+                    </div>
+                )}
+            </motion.div>
+        </div>
+    );
+}
