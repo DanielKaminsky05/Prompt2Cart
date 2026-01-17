@@ -31,11 +31,42 @@ USER FLOW
 5. Agent returns results through the endpoint
 6. Display 3-5 products with: price, name, image, store, delivery time, checkbox
 7. User clicks/checks items to "add to cart"
-8. This happens iteratively until user clicks "Checkout"
-9. Cart visualized with price and items (user can remove items)
-10. User authorizes payment
+8. User can refine search via floating chat in bottom right corner
+9. Recommendations section shows "Frequently Bought Together" items
+10. This happens iteratively until user clicks "Checkout"
+11. Cart visualized with price and items (user can remove items)
+12. User authorizes payment
 
 Offshoots: If users are not happy, they can prompt more or generate more items
+
+================================================================================
+FRONTEND UI FEATURES
+================================================================================
+Header Navigation:
+- Trovato logo (clickable → returns to home page)
+- Home button
+- How it Works button
+- Settings button
+- Login button
+- Cart button with item count badge
+
+Main Page:
+- Hero section with "Hi, what would you like to shop for?"
+- Search input with glassmorphism styling
+- Product grid with glass effect cards
+- Floating chat box (bottom right) for conversational refinement
+- Recommendations section ("Frequently Bought Together")
+
+Cart & Checkout:
+- Slide-out cart sidebar
+- Checkout modal with order summary
+- Success confirmation modal
+
+Design:
+- Glassmorphism theme (dark background, glass effects)
+- Neon accents (teal primary, pink accent)
+- Framer Motion animations
+- Responsive grid layout
 
 ================================================================================
 BACKEND ENDPOINTS
@@ -47,22 +78,22 @@ BACKEND ENDPOINTS
 - PUT user info
 
 ================================================================================
-TECH STACK (TO BE DECIDED)
+TECH STACK
 ================================================================================
-Frontend: 
-Backend: 
-Database: 
-AI/Agent: 
+Frontend: Next.js 16, TailwindCSS v4, shadcn/ui, Framer Motion
+Backend: TBD
+Database: TBD
+AI/Agent: Gemini, Shopify Catalogue MCP
 
 ================================================================================
-SYSTEM ARCHITECTURE (TO BE DESIGNED)
+SYSTEM ARCHITECTURE
 ================================================================================
-[User] → [Frontend (Chat UI)] → [Backend API] → [Agent/AI Layer] → [UCP/Merchant MCP] → [Backend API again] → [Products]
-                                      
-                              
+[User] → [Frontend (Chat UI)] → [Backend API] → [Agent/AI Layer] → [UCP/Merchant MCP] → [Products]
+                                      ↓
+                               [Recommendations Engine]
 
 ================================================================================
-DATA SCHEMA (TO BE DEFINED)
+DATA SCHEMA
 ================================================================================
 
 User Schema:
@@ -89,9 +120,9 @@ Cart Schema:
 ================================================================================
 FRIDAY TODO
 ================================================================================
-[ ] Define problem, scope, and pitch
-[ ] Decide tech stack
-[ ] Design system architecture
+[x] Define problem, scope, and pitch
+[x] Decide tech stack
+[x] Design system architecture
 [ ] Data schema for frontend, backend, UCP
 [ ] Get feedback on the idea from a judge, if possible
 
@@ -99,15 +130,19 @@ FRIDAY TODO
 STRETCH GOALS / LOWER PRIORITY FEATURES
 ================================================================================
 [ ] User shopping profile (preferences, price budget, appearance)
+We should allow sorting by relevance, price, and perhaps other features
 [ ] AI-powered visualization (show user wearing clothes via Gemini API)
 [ ] Filters: price tags, color, etc.
 [ ] Smart ranking: show products that best match query/prompt
-[] Elevan labs api
+[ ] ElevenLabs API for voice interaction
+[ ] How it Works page with tutorial
+[ ] Settings page for user preferences
+[ ] Login/Auth flow
 
 ================================================================================
 NOTES
 ================================================================================
 - Target: Shopify Track
 - Using: Universal Commerce Protocol (UCP)
-- UI Sketch: See uploaded image in project files
-
+- Frontend: frontend3 folder
+- UI Design: Glassmorphism with dark theme
