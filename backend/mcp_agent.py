@@ -121,13 +121,14 @@ class MCPLangGraphAgent:
                         
                         # Execute tool
                         result = await self.mcp_client.call_tool(name, final_args)
+                        print(result)
                         
                         if result.content[0].text == "You are not authorized to use this tool":
                             print("Shopify hates you (get new token)")
                             sys.exit(1)
                         
                         # Handle result content
-                        if hasattr(result, 'content'):
+                        if hasattr(result, 'content') and result.content:
                             contents = []
                             for item in result.content:
                                 if hasattr(item, 'text'):
@@ -284,7 +285,7 @@ class MCPLangGraphAgent:
             print()
             print()
             print()
-            print(messages[-1])
+            # print(messages[-1])
             print()
             print()
             print()
@@ -348,6 +349,8 @@ class MCPLangGraphAgent:
             "4. The JSON list must contain objects with keys: 'title', 'price', 'description', 'url', 'id'.\n"
             "   - 'id' should be the product's global ID (e.g. gid://shopify/Product/...) or the ID of its first variant.\n"
             "5. Output ONLY the JSON. Do not add conversational text."
+            "Use the following schema:"
+            "{items: {title, price, description, url, id,}[]}"
         )
        
         print("INVOKING")
