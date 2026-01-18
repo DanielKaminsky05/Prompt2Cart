@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 
 export default function HomePage() {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
   const [products, setProducts] = useState<Product[]>([]);
   const [recommendations, setRecommendations] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -75,7 +76,7 @@ export default function HomePage() {
     setCurrentQuery(query);
 
     // Retrieve products from backend
-    fetch("http://localhost:8080/search", {
+    fetch(`${API_URL}/search`, {
       method: "POST",
       headers: {
         'Content-Type': 'application/json'
@@ -192,7 +193,7 @@ export default function HomePage() {
     });
 
     try {
-      const res = await fetch("http://localhost:8080/checkout", {
+      const res = await fetch(`${API_URL}/checkout`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items })

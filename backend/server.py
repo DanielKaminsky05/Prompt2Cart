@@ -79,7 +79,8 @@ app = FastAPI(lifespan=lifespan)
 origins = [
     "http://localhost:3000", # Your React/Vue/Svelte dev server
     "http://127.0.0.1:3000",
-    "*",
+    "https://trovato.tech",
+    "https://www.trovato.tech",
 ]
 
 app.add_middleware(
