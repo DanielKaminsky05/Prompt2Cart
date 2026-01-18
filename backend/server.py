@@ -14,13 +14,6 @@ import json
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 import asyncio
-import json
-from random import random
-from time import sleep
-from enums.sort import SortBy
-from dto.search import SearchRequest
-from dto.purchase import PurchaseRequest, PurchaseResponse
-from util import search_products
 from mcp_agent import MCPLangGraphAgent
 
 load_dotenv()
@@ -34,6 +27,20 @@ async def lifespan(app: FastAPI):
         await app.state.agent.cleanup()
 
 app = FastAPI(lifespan=lifespan)
+
+# Define which origins (frontends) are allowed
+origins = [
+    "http://localhost:3000", # Your React/Vue/Svelte dev server
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,       # Allow these specific ports
+    allow_credentials=True,
+    allow_methods=["*"],         # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],         # Allow all headers
+)
 
 class CheckoutRequest(BaseModel):
     variant_id: str | int
@@ -268,4 +275,4 @@ async def create_checkout(request: CheckoutRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("server:app", host="0.0.0.0", port=8080, reload=True)
