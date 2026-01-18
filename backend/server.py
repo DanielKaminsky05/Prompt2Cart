@@ -7,6 +7,7 @@ from enums.sort import SortBy
 from dto.search import SearchRequest
 from dto.purchase import PurchaseRequest, PurchaseResponse
 from util import search_products
+from database import add_search_history
 from time import sleep
 from random import random
 import json
@@ -31,12 +32,16 @@ async def search(
     user_id: str = Query(default="")
 ):
     
-    res = await search_products(req.query, user_id)
+    
 
+    res = await search_products(req.query, user_id)
+    if user_id:
+        add_search_history(user_id, req.query)
     return {
             "items": json.dumps(json.loads(res), separators=(',', ':'))
     }
-
+    
+    
 # Purchase specified items
 @app.post("/purchase", response_model=PurchaseResponse)
 def purchase(req: PurchaseRequest):
