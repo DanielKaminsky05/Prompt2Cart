@@ -94,8 +94,7 @@ app.add_middleware(
 # Include profile routes
 app.include_router(profile_router)
 
-class CheckoutRequest(BaseModel):
-
+class CheckoutItem(BaseModel):
     variant_id: str | int
     quantity: int = 1
     store_domain: str
