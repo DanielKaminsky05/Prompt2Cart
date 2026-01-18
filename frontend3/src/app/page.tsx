@@ -255,7 +255,7 @@ export default function HomePage() {
                   </span>
                 </h1>
                 <p className="text-xl text-muted-foreground">
-                  Speak it. Cart it. Own it.
+                  Think it. Cart it. Own it.
                 </p>
               </motion.div>
 
