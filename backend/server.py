@@ -19,11 +19,56 @@ from mcp_agent import MCPLangGraphAgent
 
 load_dotenv()
 
+# Fetch fresh Shopify token on startup
+def fetch_shopify_token():
+    client_id = os.getenv("SHOPIFY_CLIENT_ID")
+    client_secret = os.getenv("SHOPIFY_CLIENT_SECRET")
+    
+    if not client_id or not client_secret:
+        print("⚠️  SHOPIFY_CLIENT_ID or SHOPIFY_CLIENT_SECRET missing. Skipping auto-fetch.")
+        return
+
+    try:
+        print("🔄 Fetching new Shopify Access Token...")
+        resp = requests.post(
+            "https://api.shopify.com/auth/access_token",
+            json={
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "grant_type": "client_credentials"
+            },
+            timeout=10
+        )
+        
+        if resp.status_code == 200:
+            data = resp.json()
+            token = data.get("access_token")
+            if token:
+                os.environ["SHOPIFY_ACCESS_TOKEN"] = token
+                print("✅ Successfully refreshed SHOPIFY_ACCESS_TOKEN")
+            else:
+                print("❌ Failed to parse access_token from response")
+        else:
+            print(f"❌ Failed to fetch token: {resp.status_code} {resp.text}")
+            
+    except Exception as e:
+        print(f"❌ Error fetching Shopify token: {e}")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Agent is now initialized lazily on first request to avoid startup timeouts/crashes
+    # 1. Try to fetch a fresh token first
+    fetch_shopify_token()
+
+    # 2. Initialize Agent immediately on startup
+    print("🚀 Pre-warming Agent Connection...")
+    # The agent will read os.environ["SHOPIFY_ACCESS_TOKEN"] which we just updated
+    app.state.agent = MCPLangGraphAgent("servers_config.json")
+    await app.state.agent.initialize()
+    print("✅ Agent Ready")
+    
     yield
-    # Cleanup if initialized
+    
+    print("🛑 Cleaning up...")
     if hasattr(app.state, "agent") and app.state.agent:
         await app.state.agent.cleanup()
 
@@ -49,18 +94,10 @@ class CheckoutRequest(BaseModel):
     store_domain: str
     access_token: str | None = None
 
-async def get_or_initialize_agent():
-    if not hasattr(app.state, "agent"):
-        app.state.agent_lock = asyncio.Lock()
-        app.state.agent = None
-
-    async with app.state.agent_lock:
-        if app.state.agent is None:
-            print("Initializing agent (lazy)...")
-            agent = MCPLangGraphAgent("servers_config.json")
-            await agent.initialize()
-            app.state.agent = agent
-    
+# Accessor for the eagerly initialized agent
+async def get_agent():
+    if not hasattr(app.state, "agent") or not app.state.agent:
+        raise HTTPException(503, "Agent not initialized (Startup failed?)")
     return app.state.agent
 
 # Search for items via the Shopify Catalog MCP Server
@@ -71,7 +108,7 @@ async def search(
     sort_order: SortBy = Query(default=SortBy.RELEVANCE),
     user_id: str = Query(default="")
 ):
-    agent = await get_or_initialize_agent()
+    agent = await get_agent()
     print(f"Searching for: {req.query}")
 
     try:
