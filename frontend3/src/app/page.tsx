@@ -7,6 +7,7 @@ import { ProductGrid } from "@/components/ProductGrid";
 import { Cart } from "@/components/Cart";
 import { Checkout, OrderSuccess } from "@/components/Checkout";
 import { FloatingChat } from "@/components/FloatingChat";
+import { SideBarChat } from "@/components/SideBarChat";
 import { Recommendations } from "@/components/Recommendations";
 import { SortingControls, SortOption } from "@/components/SortingControls";
 import { Button } from "@/components/ui/button";
@@ -167,9 +168,21 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-glow">
+      {/* Sidebar Chat - only show after first search */}
+      {hasSearched && (
+        <SideBarChat
+          onSendMessage={handleChatMessage}
+          isLoading={isLoading}
+          initialQuery={currentQuery}
+        />
+      )}
+
       {/* Header */}
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50">
+      <header 
+        className={`fixed top-0 right-0 z-50 transition-all duration-300 ${
+          hasSearched ? "left-80" : "left-0"
+        }`}
+      >
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           {/* Top Left: Logo (Trovato Text) - Clickable to go home */}
           <motion.button
@@ -214,7 +227,11 @@ export default function HomePage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 pt-24 pb-32">
+      <main 
+        className={`container mx-auto px-6 pt-24 pb-32 transition-all duration-300 ${
+          hasSearched ? "ml-80 w-[calc(100%-20rem)]" : ""
+        }`}
+      >
         {/* Hero / Welcome Section */}
         <AnimatePresence mode="wait">
           {!hasSearched && (
@@ -338,15 +355,6 @@ export default function HomePage() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Floating Chat - only show after first search */}
-      {hasSearched && !isLoading && (
-        <FloatingChat
-          onSendMessage={handleChatMessage}
-          isLoading={isLoading}
-          initialQuery={currentQuery}
-        />
-      )}
 
       {/* Cart Sidebar */}
       <Cart
