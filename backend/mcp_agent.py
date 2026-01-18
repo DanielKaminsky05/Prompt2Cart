@@ -14,6 +14,7 @@ from typing import Annotated, TypedDict, Literal, Optional
 from dotenv import load_dotenv
 
 from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage, BaseMessage
 from langchain_core.tools import tool, StructuredTool
 from langgraph.graph import StateGraph, END
