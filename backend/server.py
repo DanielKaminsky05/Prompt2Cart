@@ -1,10 +1,16 @@
 import os
 import requests
 import re
-from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel
 from enums.sort import SortBy
 from dto.search import SearchRequest
-from pydantic import BaseModel
+from dto.purchase import PurchaseRequest, PurchaseResponse
+from util import search_products
+from database import add_search_history
+from time import sleep
+from random import random
+import json
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 import asyncio
@@ -55,6 +61,7 @@ async def search(
     req: SearchRequest,
     limit: int = Query(default=10, ge=1, le=100),
     sort_order: SortBy = Query(default=SortBy.RELEVANCE),
+    user_id: str = Query(default="")
 ):
     agent = await get_or_initialize_agent()
     print(f"Searching for: {req.query}")
@@ -65,7 +72,8 @@ async def search(
         
         # Clean response (sometimes LLMs add markdown)
         cleaned_res = res.strip().strip('`').replace('json\n', '')
-        
+        if user_id:
+          add_search_history(user_id, req.query)
         return {
             "items": json.dumps(json.loads(cleaned_res), separators=(",", ":"))
         }
