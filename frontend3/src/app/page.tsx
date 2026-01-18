@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 
 export default function HomePage() {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
   const [products, setProducts] = useState<Product[]>([]);
   const [recommendations, setRecommendations] = useState<Product[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -32,6 +33,7 @@ export default function HomePage() {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
   const [checkouts, setCheckouts] = useState<CheckoutResponse[]>([]);
+  const [lastAgentResponse, setLastAgentResponse] = useState("");
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const router = useRouter();
 
@@ -181,7 +183,7 @@ export default function HomePage() {
     });
 
     try {
-      const res = await fetch("http://localhost:8080/checkout", {
+      const res = await fetch(`${API_URL}/checkout`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items })
