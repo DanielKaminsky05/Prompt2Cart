@@ -36,7 +36,7 @@ If you need more details about a specific product, use get_global_product_detail
 Be concise but helpful. Keep your response in the JSON format for easy parsing. No backticks, just raw JSON text."""
 
 
-async def search_products(agent: MCPLangGraphAgent, query: str) -> str:
+async def search_products(agent: MCPLangGraphAgent, query: str, user_id: str = "") -> str:
     """Run a single product search query through the agent."""
     history = get_search_history(user_id)
     prompt = f"{SYSTEM_PROMPT}\n\nUser query: {query}"

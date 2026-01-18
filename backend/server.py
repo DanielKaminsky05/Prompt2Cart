@@ -2,6 +2,7 @@ import os
 import requests
 import re
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from enums.sort import SortBy
 from dto.search import SearchRequest
