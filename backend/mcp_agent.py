@@ -35,7 +35,6 @@ class AgentState(TypedDict):
 class MCPLangGraphAgent:
     """
     A LangGraph agent that integrates with MCP servers via the MCPMultiClient.
-    Uses OpenAI's GPT-4o model for reasoning.
     """
 
     def __init__(self, config_path: str = "servers_config.json"):
@@ -121,7 +120,7 @@ class MCPLangGraphAgent:
                         
                         # Execute tool
                         result = await self.mcp_client.call_tool(name, final_args)
-                        
+
                         # Handle result content
                         if hasattr(result, 'content'):
                             contents = []
@@ -244,14 +243,10 @@ class MCPLangGraphAgent:
             response = await self.model.ainvoke(messages)
             
             # --- CEREBRAS/LLAMA COMPATIBILITY PATCH ---
-            # If the model outputs raw JSON describing a function call instead of a native tool_call,
-            # we manually parse it and inject it as a tool_call.
             if not response.tool_calls and response.content:
                 content = response.content.strip()
-                # Check for the specific pattern seen in logs
                 if content.startswith('{"type": "function"') and "parameters" in content:
                     try:
-                        print(f"🔧 Detected raw JSON tool call in content. Parsing manually...")
                         data = json.loads(content)
                         if data.get("type") == "function":
                             tool_name = data.get("name")
@@ -266,10 +261,9 @@ class MCPLangGraphAgent:
                             
                             # Inject into message
                             response.tool_calls = [tool_call]
-                            response.content = "" # Clear content to prevent double Printing
-                            print(f"✅ Converted to tool_call: {tool_name}")
-                    except Exception as e:
-                        print(f"⚠️ Failed to parse raw tool call: {e}")
+                            response.content = "" 
+                    except Exception:
+                        pass # Ignore parsing errors on best-effort basis
             # ------------------------------------------
 
             return {"messages": [response]}
@@ -330,10 +324,15 @@ class MCPLangGraphAgent:
         config = {"configurable": {"thread_id": thread_id}}
         
         system_prompt = (
-            "You are a precise product search assistant. "
-            "List items with their price, description, features, and website link. "
-            "Do not add any conversational filler, greetings, or conclusions. "
-            "Output STRICTLY the list."
+            "You are a helpful shopping assistant with access to Shopify's global product catalog. "
+            "\n\n"
+            "PROTOCOL:\n"
+            "1. If the user asks for a product, usage `search_global_products`.\n"
+            "2. Once you get the search results, DO NOT SEARCH AGAIN. Format the REAL results into a JSON list.\n"
+            "3. DO NOT HALLUCINATE. Use ONLY the data returned by the tool. If no results, return an empty list [].\n"
+            "4. The JSON list must contain objects with keys: 'title', 'price', 'description', 'url', 'id'.\n"
+            "   - 'id' should be the product's global ID (e.g. gid://shopify/Product/...) or the ID of its first variant.\n"
+            "5. Output ONLY the JSON. Do not add conversational text."
         )
         
         result = await self.graph.ainvoke(
