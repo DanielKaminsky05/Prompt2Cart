@@ -327,7 +327,7 @@ class MCPLangGraphAgent:
             "3. DO NOT HALLUCINATE. Use ONLY the data returned by the tool. If no results, return an empty list [].\n"
             "4. The JSON list must contain objects with keys: 'title', 'price', 'description', 'url', 'id'.\n"
             "   - 'id' should be the product's global ID (e.g. gid://shopify/Product/...) or the ID of its first variant.\n"
-            "5. Output ONLY the JSON. Do not add conversational text."
+            "5. Output ONLY the JSON. Do not add conversational text. Do not start with 'Here is the JSON'. Start immediately with `[` and end with `]`."
             "Use the following schema:"
             "{items: {title, price, description, url, id,}[]}"
         )

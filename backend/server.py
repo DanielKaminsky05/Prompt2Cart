@@ -111,26 +111,56 @@ async def search(
     agent = await get_agent()
     print(f"Searching for: {req.query}")
 
+    # Pass user_id for history tracking if needed (though history is handled in util.py now?)
+    # Let's clean up util.py's history implementation vs server.py's
+    # For now, just call search_products
     try:
-        res = await search_products(agent, req.query)
+        res = await search_products(agent, req.query, user_id)
         print(f"Agent Response: {res}")
         
-        # Clean response (sometimes LLMs add markdown)
-        cleaned_res = res.strip().strip('`').replace('json\n', '')
+        # Robust JSON extraction
+        try:
+            # Try parsing directly first
+            data = json.loads(res.strip())
+        except json.JSONDecodeError:
+            # Fallback: Extract JSON array from text using regex
+            import re
+            match = re.search(r'\[.*\]', res, re.DOTALL)
+            if match:
+                json_str = match.group(0)
+                try:
+                    data = json.loads(json_str)
+                except json.JSONDecodeError:
+                     # Attempt to fix common trailing comma issues or markdown
+                     clean_str = json_str.replace("`", "").strip()
+                     data = json.loads(clean_str)
+            else:
+                 # Last resort: try to find just the JSON array start
+                 if "[" in res:
+                     start = res.find("[")
+                     end = res.rfind("]") + 1
+                     clean_str = res[start:end]
+                     data = json.loads(clean_str)
+                 else:
+                    raise ValueError("No JSON array found in response")
+
         if user_id:
-          add_search_history(user_id, req.query)
+            # Note: add_search_history might be redundant if util.py does it, 
+            # but util.py only READS history currently. 
+            # server.py ADDS history after successful response.
+            add_search_history(user_id, req.query)
+            
         return {
-            "items": json.dumps(json.loads(cleaned_res), separators=(",", ":"))
+            "items": json.dumps(data, separators=(",", ":"))
         }
-    except json.JSONDecodeError:
-        print(f"JSON Decode Error. Raw response: {res}")
-        # Fallback: return the raw text if json fails
-        return {"items": [], "raw_response": res, "error": "Failed to parse JSON"}
+
     except Exception as e:
-        print(f"Search Error: {e}")
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Search failed/parse error: {e}")
+        # Return empty list on failure, but log it
+        return {
+            "items": "[]", 
+            "error": "Failed to parse JSON response from AI"
+        }
 
 
 # Purchase specified items

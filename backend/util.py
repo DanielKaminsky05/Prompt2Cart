@@ -50,7 +50,7 @@ async def search_products(agent: MCPLangGraphAgent, query: str, user_id: str = "
     
     prompt += "\n\nIMMEDIATE INSTRUCTION: Call the search_global_products tool immediately. Do not talk. Output the tool call JSON directly."
 
-    return await agent.chat(prompt, thread_id=f"product_search:{hash(query)}")
+    return await agent.chat(prompt, thread_id=f"product_search:{str(uuid.uuid4())}")
 
 
 
