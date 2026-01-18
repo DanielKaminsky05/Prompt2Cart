@@ -1,8 +1,15 @@
 import os
 import requests
 import re
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
+from enums.sort import SortBy
+from dto.search import SearchRequest
+from dto.purchase import PurchaseRequest, PurchaseResponse
+from util import search_products
+from time import sleep
+from random import random
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -20,10 +27,11 @@ class CheckoutRequest(BaseModel):
 async def search(
     req: SearchRequest,
     limit: int = Query(default=10, ge=1, le=100),
-    sort_order: str = Query(default=SortBy.RELEVANCE)
+    sort_order: str = Query(default=SortBy.RELEVANCE),
+    user_id: str = Query(default="")
 ):
     
-    res = await search_products(req.query)
+    res = await search_products(req.query, user_id)
 
     return {
             "items": json.dumps(json.loads(res), separators=(',', ':'))
