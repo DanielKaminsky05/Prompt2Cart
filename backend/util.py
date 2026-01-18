@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from mcp_agent import MCPLangGraphAgent
+from database import add_search_history, get_search_history
 
 
 SYSTEM_PROMPT = """You are a helpful shopping assistant with access to Shopify's global product catalog.
@@ -35,11 +36,20 @@ If you need more details about a specific product, use get_global_product_detail
 Be concise but helpful. Keep your response in the JSON format for easy parsing. No backticks, just raw JSON text."""
 
 
-async def search_products(agent: MCPLangGraphAgent, query: str) -> str:
+async def search_products(agent: MCPLangGraphAgent, query: str, user_id: str = "") -> str:
     """Run a single product search query through the agent."""
-    print(f"[*] Searching for: {query}\n")
+    history = get_search_history(user_id)
+    print(history)
+    prompt = f"{SYSTEM_PROMPT}\n\nUser query: {query}"
 
-    return await agent.chat(query, thread_id=f"product_search:{hash(query)}")
+    if history:
+        print(f"[*] Found {len(history)} past searches for context.")
+        history_str = "\n".join([f"- {h}" for h in history])
+        prompt += f"\n\nRecent Search History:\n{history_str}\n\nUse this history to better understand the user's preferences if relevant."
+
+    print(f"[*] Searching for: {prompt}\n")
+
+    return await agent.chat(prompt, thread_id=f"product_search:{hash(query)}")
 
 
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { ChatInput } from "@/components/ChatInput";
 import { ProductGrid } from "@/components/ProductGrid";
 import { Cart } from "@/components/Cart";
@@ -13,6 +14,9 @@ import { Product, mockProducts } from "@/lib/mockData";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Home, User, Settings, HelpCircle } from "lucide-react";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -25,6 +29,27 @@ export default function HomePage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.refresh();
+  };
 
   const handleGoHome = () => {
     setProducts([]);
@@ -34,22 +59,49 @@ export default function HomePage() {
     setSortBy("relevance");
   };
 
+  useEffect(() => {
+    setIsLoading(false)
+  }, [products]) 
+
   const handleSearch = async (query: string) => {
+    console.log("bruh")
+
     setIsLoading(true);
     setHasSearched(true);
     setCurrentQuery(query);
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1200));
+    // Retrieve products from backend
+    fetch("http://localhost:8080/search", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        'query': query
+      })
+    })
+    .then(res => res.json())
+    .then(data => JSON.parse(data.items).map((product): Product => {
+      return {
+        id: crypto.randomUUID(),
+        name: product["name"],
+        price: product["price"],
+        image: "url",
+        store: product["link"],
+        deliveryTime: "unknown",
+        description: product["description"],
+      }
+    }))
+    .then(data => {setProducts(data)})
 
     // Mock: return random 4-6 products
-    const shuffled = [...mockProducts].sort(() => 0.5 - Math.random());
-    const count = Math.floor(Math.random() * 3) + 4;
-    setProducts(shuffled.slice(0, count));
+    // const shuffled = [...mockProducts].sort(() => 0.5 - Math.random());
+    // const count = Math.floor(Math.random() * 3) + 4;
+    // setProducts(shuffled.slice(0, count));
 
     // Mock recommendations (remaining products)
-    setRecommendations(shuffled.slice(count, count + 4));
-    setIsLoading(false);
+    // setRecommendations(shuffled.slice(count, count + 4));
+    // setIsLoading(false);
   };
 
   // Sort products based on current sort option
@@ -168,16 +220,28 @@ export default function HomePage() {
                 <Settings className="h-4 w-4" />
                 Settings
               </Button>
-              <a href="/login">
+              {user ? (
                 <Button
                   variant="ghost"
                   size="sm"
+                  onClick={handleSignOut}
                   className="text-muted-foreground hover:text-white hover:bg-white/5 gap-2 transition-all duration-200"
                 >
                   <User className="h-4 w-4" />
-                  Login
+                  Sign Out
                 </Button>
-              </a>
+              ) : (
+                <Link href="/login">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-white hover:bg-white/5 gap-2 transition-all duration-200"
+                  >
+                    <User className="h-4 w-4" />
+                    Login
+                  </Button>
+                </Link>
+              )}
             </motion.nav>
           </div>
 

@@ -1,20 +1,20 @@
 import os
 import requests
 import re
-from fastapi import FastAPI, HTTPException, Query, Depends
-from enums.sort import SortBy
-from dto.search import SearchRequest
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from dotenv import load_dotenv
-from contextlib import asynccontextmanager
-import asyncio
-import json
-from random import random
-from time import sleep
 from enums.sort import SortBy
 from dto.search import SearchRequest
 from dto.purchase import PurchaseRequest, PurchaseResponse
 from util import search_products
+from database import add_search_history
+from time import sleep
+from random import random
+import json
+from dotenv import load_dotenv
+from contextlib import asynccontextmanager
+import asyncio
 from mcp_agent import MCPLangGraphAgent
 
 load_dotenv()
@@ -74,6 +74,20 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Define which origins (frontends) are allowed
+origins = [
+    "http://localhost:3000", # Your React/Vue/Svelte dev server
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,       # Allow these specific ports
+    allow_credentials=True,
+    allow_methods=["*"],         # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],         # Allow all headers
+)
+
 class CheckoutRequest(BaseModel):
     variant_id: str | int
     quantity: int = 1
@@ -92,6 +106,7 @@ async def search(
     req: SearchRequest,
     limit: int = Query(default=10, ge=1, le=100),
     sort_order: SortBy = Query(default=SortBy.RELEVANCE),
+    user_id: str = Query(default="")
 ):
     agent = await get_agent()
     print(f"Searching for: {req.query}")
@@ -102,7 +117,8 @@ async def search(
         
         # Clean response (sometimes LLMs add markdown)
         cleaned_res = res.strip().strip('`').replace('json\n', '')
-        
+        if user_id:
+          add_search_history(user_id, req.query)
         return {
             "items": json.dumps(json.loads(cleaned_res), separators=(",", ":"))
         }
@@ -297,4 +313,4 @@ async def create_checkout(request: CheckoutRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("server:app", host="0.0.0.0", port=8080, reload=True)
