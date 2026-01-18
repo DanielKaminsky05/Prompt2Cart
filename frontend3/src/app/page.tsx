@@ -168,109 +168,48 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-glow">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Logo + Navigation grouped together */}
-          <div className="flex items-center gap-6">
-            {/* Logo - Clickable to go home */}
-            <motion.button
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              onClick={handleGoHome}
-              className="flex items-center gap-2 hover:opacity-80 transition-all duration-200 hover:scale-105"
-            >
-              <Image
-                src="/logo1.png"
-                alt="Trovato"
-                width={40}
-                height={40}
-                className="rounded-lg"
-              />
-              <span className="text-xl font-bold text-white">Trovato</span>
-            </motion.button>
+          {/* Top Left: Logo (Trovato Text) - Clickable to go home */}
+          <motion.button
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            onClick={handleGoHome}
+            className="flex items-center gap-2 hover:opacity-80 transition-all duration-200 hover:scale-105"
+          >
+            <span className="text-xl font-bold text-white">Trovato</span>
+          </motion.button>
 
-            {/* Navigation - next to logo */}
-            <motion.nav
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="hidden md:flex items-center gap-1"
-            >
+          {/* Top Right: Navigation (Login/Sign Out) */}
+          <motion.nav
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-1"
+          >
+            {user ? (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleGoHome}
+                onClick={handleSignOut}
                 className="text-muted-foreground hover:text-white hover:bg-white/5 gap-2 transition-all duration-200"
               >
-                <Home className="h-4 w-4" />
-                Home
+                <User className="h-4 w-4" />
+                Sign Out
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-white hover:bg-white/5 gap-2 transition-all duration-200"
-              >
-                <HelpCircle className="h-4 w-4" />
-                How it Works
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-white hover:bg-white/5 gap-2 transition-all duration-200"
-              >
-                <Settings className="h-4 w-4" />
-                Settings
-              </Button>
-              {user ? (
+            ) : (
+              <Link href="/login">
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleSignOut}
                   className="text-muted-foreground hover:text-white hover:bg-white/5 gap-2 transition-all duration-200"
                 >
                   <User className="h-4 w-4" />
-                  Sign Out
+                  Login
                 </Button>
-              ) : (
-                <Link href="/login">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-white hover:bg-white/5 gap-2 transition-all duration-200"
-                  >
-                    <User className="h-4 w-4" />
-                    Login
-                  </Button>
-                </Link>
-              )}
-            </motion.nav>
-          </div>
-
-          {/* Cart Button */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              className="relative glass border-white/10 hover:bg-white/5 transition-all duration-200"
-              onClick={() => setIsCartOpen(true)}
-            >
-              <ShoppingCart className="h-5 w-5" />
-              <AnimatePresence>
-                {selectedProducts.length > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-bold"
-                  >
-                    {selectedProducts.length}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </Button>
-          </motion.div>
+              </Link>
+            )}
+          </motion.nav>
         </div>
       </header>
 
@@ -339,15 +278,6 @@ export default function HomePage() {
             >
               <div className="relative">
                 <div className="h-16 w-16 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Image
-                    src="/logo.png"
-                    alt="Loading"
-                    width={32}
-                    height={32}
-                    className="animate-pulse rounded-md"
-                  />
-                </div>
               </div>
               <p className="text-muted-foreground text-lg">
                 Finding the best products for you...
@@ -390,12 +320,12 @@ export default function HomePage() {
 
       {/* Floating Cart Button */}
       <AnimatePresence>
-        {selectedProducts.length > 0 && !isCartOpen && (
+        {(hasSearched || selectedProducts.length > 0) && !isCartOpen && (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40"
+            className="fixed bottom-6 right-6 z-40"
           >
             <Button
               size="lg"
@@ -403,10 +333,7 @@ export default function HomePage() {
               className="h-14 px-8 rounded-full bg-primary hover:bg-primary/90 glow-primary shadow-2xl gap-3"
             >
               <ShoppingCart className="h-5 w-5" />
-              <span>View Cart ({selectedProducts.length})</span>
-              <span className="font-bold">
-                ${selectedProducts.reduce((sum, p) => sum + p.price, 0).toFixed(0)}
-              </span>
+              <span>Cart ({selectedProducts.length})</span>
             </Button>
           </motion.div>
         )}
