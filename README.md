@@ -1,4 +1,4 @@
-# Trovato - Think it. Cart it. Own it.
+# Prompt2Cart - Think it. Cart it. Own it.
 
 **By Josh, Hadi, Daniel, Henrique**
 
